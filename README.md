@@ -1,7 +1,7 @@
 # Brisk
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/cb182654-9a53-402c-8dec-d4eb1c5b430e" width="300">
+  <img src="https://github.com/user-attachments/assets/b9cf2959-e55c-4abc-b5a9-0f9c7efe5e7a" width="300">
 </p>
 
 Generate remote custom desktop notifications for users using MQTT.
@@ -40,7 +40,7 @@ $ mosquitto_pub -h <BROKER_HOSTNAME> -p 1883 -t "brisk" -m '{"id": 23, "summary"
 
 **Desktop notification**
 
-![image](https://github.com/user-attachments/assets/bf3e32bb-51f2-4e95-9abe-e73cc1c33af4)
+![image](https://github.com/user-attachments/assets/42521023-fc18-49f7-acf4-6c9bc70bcff9)
 
 ## Roadmap
 
