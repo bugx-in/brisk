@@ -1,5 +1,9 @@
 # Brisk
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/cb182654-9a53-402c-8dec-d4eb1c5b430e" width="300">
+</p>
+
 Generate remote custom desktop notifications for users using MQTT.
 
 The brisk client subscribes to a topic in the MQTT broker and waits for messages. When a message is received in that topic it is parsed and converted to a desktop notification.
