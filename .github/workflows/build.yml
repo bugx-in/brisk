@@ -47,12 +47,11 @@ jobs:
       - name: Rename binaries
         run: |
           mkdir -p brisk-bins
-          ls -l target
-          echo ${arch}
-          ls -l target/*/release
           for arch in $(ls target); do
             if [[ -e "target/${arch}/release/brisk" ]]; then
               cp target/${arch}/release/brisk brisk-bins/brisk-${arch}
+            elif [[ -e "target/${arch}/release/brisk.exe" ]]; then
+              cp target/${arch}/release/brisk.exe brisk-bins/brisk-${arch}.exe
             fi
           done
 
