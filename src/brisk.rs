@@ -1,22 +1,29 @@
 // src/brisk.rs
 
 #![allow(dead_code)]
+use whoami;
 use std::thread;
 use notify_rust::Notification;
 use rumqttc::v5::mqttbytes::{v5::Publish, v5::Packet, QoS};
 use rumqttc::v5::{AsyncClient, ClientError, ConnectionError, MqttOptions};
+use rumqttc::{TlsConfiguration, Transport};
 use serde_json::error;
 use std::time::Duration;
 use tokio::{task, time};
 use crate::message::*;
 use gethostname::gethostname;
 
+/// Brisk struct
 #[derive(Clone, Debug)]
 pub struct Brisk {
     pub broker: String,
     pub port: u16,
     pub topics: Vec<String>,
     pub keep_alive: u64,
+    pub default_ca: bool,
+    pub root_ca: Option<String>,
+    pub client_cert: Option<String>,
+    pub client_key: Option<String>,
 }
 
 impl Brisk {
@@ -55,9 +62,31 @@ impl Brisk {
         self
     }
 
+    /// Root CA.
+    pub fn root_ca(&mut self, root_ca: Option<String>) -> &mut Brisk {
+        self.root_ca.clone_from(&root_ca);
+        self
+    }
+
+    /// Client certificate
+    pub fn client_cert(&mut self, client_cert: Option<String>) -> &mut Brisk {
+        self.client_cert.clone_from(&client_cert);
+        self
+    }
+
+    /// Client key
+    pub fn client_key(&mut self, client_key: Option<String>) -> &mut Brisk {
+        self.client_key.clone_from(&client_key);
+        self
+    }
+
     /// ID for the MQTT connection.
-    pub fn id(&self) -> String {
+    fn id() -> String {
         gethostname().to_str().unwrap().to_string()
+    }
+
+    fn id_user() -> String {
+        whoami::username()
     }
 
     /// Finalizes the builder.
@@ -119,9 +148,22 @@ impl Brisk {
     /// Run brisker.
     pub async fn run(&self) -> Result<(), ClientError> {
         // Initialize MQTT client options.
-        let mqttoptions = MqttOptions::new(self.id(), self.broker.clone(), self.port.clone())
+        let mut mqttoptions = MqttOptions::new(Brisk::id_user(), self.broker.clone(), self.port.clone())
             .set_keep_alive(Duration::from_secs(self.keep_alive))
             .clone();
+
+        // Use client authentication.
+        if let (Some(root_ca), Some(client_cert), Some(client_key)) = (self.root_ca.as_ref(), self.client_cert.as_ref(), self.client_key.as_ref()) {
+            let transport = Transport::Tls(TlsConfiguration::Simple {
+                ca: root_ca.as_bytes().to_vec(),
+                alpn: None,
+                client_auth: Some((
+                    client_cert.as_bytes().to_vec(),
+                    client_key.as_bytes().to_vec(),
+                )) 
+            });
+            mqttoptions.set_transport(transport);
+        }
 
         // Create a new MQTT client and subscribe to topics.
         let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
@@ -175,7 +217,14 @@ impl Brisk {
 
 impl Default for Brisk {
     fn default() -> Brisk {
-        Brisk { broker: String::new(), port: 1883, topics: Vec::new(), keep_alive: 5 }
+        Brisk { broker: String::new(),
+                port: 1883,
+                topics: Vec::new(),
+                keep_alive: 5,
+                default_ca: false,
+                root_ca: None,
+                client_cert: None,
+                client_key: None }
     }
     
 }
