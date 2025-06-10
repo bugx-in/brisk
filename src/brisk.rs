@@ -94,6 +94,31 @@ impl Brisk {
         self.clone()
     }
 
+    #[cfg(target_os = "windows")]
+    /// Run the notification.
+    fn notify(message: &Message) {
+        // Initialize the notifier.
+        let mut notifier = Notification::new()
+            .summary(&message.summary)
+            .body(&message.body)
+            .icon(&message.icon)
+            .timeout(0)
+            .finalize();
+
+        // Add actions if any.
+        for action in message.actions.iter().flatten() {
+            notifier.action(&action.name, &action.display);
+        }
+
+         let _ = thread::spawn(move || {
+            // Get the user's response.
+            notifier.show().unwrap();
+
+        println!("Finishing")
+        });
+    }
+
+    #[cfg(target_os = "linux")]
     /// Run the notification.
     fn notify(message: &Message) {
         // Initialize the notifier.

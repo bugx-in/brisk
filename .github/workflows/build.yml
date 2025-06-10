@@ -49,6 +49,9 @@ jobs:
 
       - name: Build armv7-unknown-linux-gnueabihf
         run: cross build --target armv7-unknown-linux-gnueabihf --release
+      
+      - name: Build x86_64-pc-windows-gnu
+        run: cross build --target x86_64-pc-windows-gnu --release
 
       - name: Rename binaries
         run: |
