@@ -12,6 +12,7 @@ use std::time::Duration;
 use tokio::{task, time};
 use crate::message::*;
 use gethostname::gethostname;
+use log::{debug, error, info, warn};
 
 /// Brisk struct
 #[derive(Clone, Debug)]
@@ -33,49 +34,49 @@ impl Brisk {
     }
 
     /// Broker hostname.
-    pub fn broker(&mut self, broker: String) -> &mut Brisk {
+    pub fn broker(&mut self, broker: &str) -> &mut Brisk {
         broker.clone_into(&mut self.broker);
         self
     }
 
     /// Broker port.
-    pub fn port(&mut self, port: u16) -> &mut Brisk {
+    pub fn port(&mut self, port: &u16) -> &mut Brisk {
         port.clone_into(&mut self.port);
         self
     }
 
     /// Add topic to broker.
-    pub fn topic(&mut self, topic: String) -> &mut Brisk {
-        self.topics.push(topic);
+    pub fn topic(&mut self, topic: &str) -> &mut Brisk {
+        self.topics.push(topic.to_string());
         self
     }
 
     /// Broker topics.
-    pub fn topics(&mut self, topics: Vec<String>) -> &mut Brisk {
+    pub fn topics(&mut self, topics: &Vec<String>) -> &mut Brisk {
         topics.clone_into(&mut self.topics);
         self
     }
 
     /// Keep alive.
-    pub fn keep_alive(&mut self, keep_alive: u64) -> &mut Brisk {
+    pub fn keep_alive(&mut self, keep_alive: &u64) -> &mut Brisk {
         keep_alive.clone_into(&mut self.keep_alive);
         self
     }
 
     /// Root CA.
-    pub fn root_ca(&mut self, root_ca: Option<String>) -> &mut Brisk {
+    pub fn root_ca(&mut self, root_ca: &Option<String>) -> &mut Brisk {
         self.root_ca.clone_from(&root_ca);
         self
     }
 
     /// Client certificate
-    pub fn client_cert(&mut self, client_cert: Option<String>) -> &mut Brisk {
+    pub fn client_cert(&mut self, client_cert: &Option<String>) -> &mut Brisk {
         self.client_cert.clone_from(&client_cert);
         self
     }
 
     /// Client key
-    pub fn client_key(&mut self, client_key: Option<String>) -> &mut Brisk {
+    pub fn client_key(&mut self, client_key: &Option<String>) -> &mut Brisk {
         self.client_key.clone_from(&client_key);
         self
     }
@@ -105,16 +106,9 @@ impl Brisk {
             .timeout(0)
             .finalize();
 
-        // Add actions if any.
-        for action in message.actions.iter().flatten() {
-            notifier.action(&action.name, &action.display);
-        }
-
          let _ = thread::spawn(move || {
             // Get the user's response.
             notifier.show().unwrap();
-
-        println!("Finishing")
         });
     }
 
@@ -140,15 +134,15 @@ impl Brisk {
         let _ = thread::spawn(move || {
             // Get the user's response.
             notifier.show().unwrap().wait_for_action(|action | {
-                println!("{}", action);
+                debug!("Action from user: {action:?}");
                 action_str.push_str(action)
             });
 
-        // Execute action with non-blocking.
-        if action_str == "action1" {
-            let _ = open::with_detached("https://google.com", "firefox");
-        }
-        println!("Finishing")
+            // Execute action with non-blocking.
+            if action_str == "action1" {
+                let _ = open::with_detached("https://google.com", "firefox");
+            }
+
         });
     }
 
@@ -156,7 +150,7 @@ impl Brisk {
     fn parse_mqtt_message(msg: Publish) -> Result<Message, error::Error> {
         // Convert payload bytes to string.
         let payload_str: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&msg.payload);
-        println!("Received message on topic '{:?}': {:?}", msg.topic, payload_str);
+        debug!("Received message on topic {:?}: {:?}", msg.topic, payload_str);
 
         // Load the message.
         // Return error if message could not be parsed.
@@ -165,7 +159,7 @@ impl Brisk {
             Err(error) => return Err(error)
         };
 
-        println!("Message parsed: {:?}", mqtt_message);
+        debug!("Message parsed: {:?}", mqtt_message);
         Ok(mqtt_message)
     }
 
@@ -190,13 +184,17 @@ impl Brisk {
             mqttoptions.set_transport(transport);
         }
 
+        debug!("Using MQTT options: {mqttoptions:?}");
+
         // Create a new MQTT client and subscribe to topics.
         let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
         for topic in &self.topics {
+            debug!("Subscribing to topic: {:?}", topic);
             client.subscribe(topic, QoS::AtMostOnce).await?;
         }
 
         // Spawn a task to handle incoming messages.
+        info!("Listening for MQTT packets...");
         task::spawn(async move {
             loop {
                 match eventloop.poll().await {
@@ -207,7 +205,7 @@ impl Brisk {
                             // If error reading message skip it.
                             let mqtt_message = match Brisk::parse_mqtt_message(msg) {
                                 Err(e) => {
-                                    println!("Message could not be parsed: {}", e);
+                                    warn!("Message could not be parsed: {e:?}");
                                     continue;
                                 }
                                 Ok(message) => message
@@ -218,11 +216,11 @@ impl Brisk {
                         }
                     }
                     Err(ConnectionError::Io(e)) => {
-                        println!("Error receiving message: {}", e);
+                        error!("Error receiving message from MQTT broker: {e:?}");
                         if let std::io::ErrorKind::ConnectionRefused = e.kind() {
-                            println!("Connection lost. Attempting to reconnect...");
+                            warn!("Connection lost. Attempting to reconnect...");
                         } else {
-                            println!("Could not connect to the message broker, will try in 1 minute.");
+                            warn!("Could not connect to the message broker, will try again in 1 minute.");
                             time::sleep(Duration::from_secs(60)).await;
                             
                         }
