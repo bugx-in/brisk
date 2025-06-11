@@ -22,12 +22,15 @@ Brisk command line interface
 Usage: brisk [OPTIONS] --broker <BROKER>
 
 Options:
-  -b, --broker <BROKER>          Hostname of the broker [env: BRISK_BROKER=]
-  -p, --port <PORT>              Port of the broker [env: BRISK_BROKER_PORT=] [default: 1883]
-  -t, --topics <TOPICS>          Topic of the broker [env: BRISK_TOPICS=]
-  -k, --keep-alive <KEEP_ALIVE>  Topic of the broker [env: BRISK_KEEP_ALIVE=] [default: 5]
-  -h, --help                     Print help
-  -V, --version                  Print version
+  -b, --broker <BROKER>            Hostname of the broker [env: BRISK_BROKER=]
+  -p, --port <PORT>                Port of the broker [env: BRISK_BROKER_PORT=] [default: 1883]
+  -t, --topics <TOPICS>            Topics of the broker [env: BRISK_TOPICS=] [default: brisk]
+  -k, --keep-alive <KEEP_ALIVE>    Maximum time in seconds allowed to elapse between MQTT packets sent by the client [env: BRISK_KEEP_ALIVE=] [default: 20]
+      --root-ca <ROOT_CA>          Root CA certificate for TLS connection [env: BRISK_ROOT_CA=]
+      --client-cert <CLIENT_CERT>  Client certificate for mTLS connection [env: BRISK_CLIENT_CERT=]
+      --client-key <CLIENT_KEY>    Client key for mTLS connection [env: BRISK_CLIENT_KEY=]
+  -h, --help                       Print help
+  -V, --version                    Print version
 ```
 
 ## Notifications
