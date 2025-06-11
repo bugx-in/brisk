@@ -25,6 +25,8 @@ pub struct Brisk {
     pub root_ca: Option<String>,
     pub client_cert: Option<String>,
     pub client_key: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 
 impl Brisk {
@@ -33,13 +35,13 @@ impl Brisk {
         Brisk::default()
     }
 
-    /// Broker hostname.
+    /// Set broker hostname.
     pub fn broker(&mut self, broker: &str) -> &mut Brisk {
         broker.clone_into(&mut self.broker);
         self
     }
 
-    /// Broker port.
+    /// Set broker port.
     pub fn port(&mut self, port: &u16) -> &mut Brisk {
         port.clone_into(&mut self.port);
         self
@@ -51,37 +53,49 @@ impl Brisk {
         self
     }
 
-    /// Broker topics.
+    /// Set broker topics.
     pub fn topics(&mut self, topics: &Vec<String>) -> &mut Brisk {
         topics.clone_into(&mut self.topics);
         self
     }
 
-    /// Keep alive.
+    /// Set keep alive.
     pub fn keep_alive(&mut self, keep_alive: &u64) -> &mut Brisk {
         keep_alive.clone_into(&mut self.keep_alive);
         self
     }
 
-    /// Root CA.
+    /// Set root CA.
     pub fn root_ca(&mut self, root_ca: &Option<String>) -> &mut Brisk {
         self.root_ca.clone_from(&root_ca);
         self
     }
 
-    /// Client certificate
+    /// Set client certificate
     pub fn client_cert(&mut self, client_cert: &Option<String>) -> &mut Brisk {
         self.client_cert.clone_from(&client_cert);
         self
     }
 
-    /// Client key
+    /// Set client key
     pub fn client_key(&mut self, client_key: &Option<String>) -> &mut Brisk {
         self.client_key.clone_from(&client_key);
         self
     }
 
-    /// ID for the MQTT connection.
+    /// Set username.
+    pub fn username(&mut self, username: &Option<String>) -> &mut Brisk {
+        self.username.clone_from(&username);
+        self
+    }
+
+    /// Set password
+    pub fn password(&mut self, password: &Option<String>) -> &mut Brisk {
+        self.password.clone_from(&password);
+        self
+    }
+
+    /// Hostname ID.
     fn id() -> String {
         gethostname().to_str().unwrap().to_string()
     }
@@ -171,6 +185,11 @@ impl Brisk {
             .set_keep_alive(Duration::from_secs(self.keep_alive))
             .clone();
 
+        // Set username and password for the connection.
+        if let (Some(username), Some(password)) = (self.username.as_ref(), self.password.as_ref()) {
+            mqttoptions.set_credentials(username, password);
+        };
+
         // Use client authentication.
         if let (Some(root_ca), Some(client_cert), Some(client_key)) = (self.root_ca.as_ref(), self.client_cert.as_ref(), self.client_key.as_ref()) {
             let transport = Transport::Tls(TlsConfiguration::Simple {
@@ -247,7 +266,9 @@ impl Default for Brisk {
                 default_ca: false,
                 root_ca: None,
                 client_cert: None,
-                client_key: None }
+                client_key: None,
+                username: None,
+                password: None }
     }
     
 }

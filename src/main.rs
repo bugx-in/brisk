@@ -34,16 +34,24 @@ struct Args {
     root_ca: Option<String>,
 
     /// Client certificate for mTLS connection.
-    #[arg(long, env = "BRISK_CLIENT_CERT", default_value = None )]
+    #[arg(long, env = "BRISK_CLIENT_CERT", default_value = None, requires = "client_key" )]
     client_cert: Option<String>,
 
     /// Client key for mTLS connection.
-    #[arg(long, env = "BRISK_CLIENT_KEY", default_value = None )]
+    #[arg(long, env = "BRISK_CLIENT_KEY", default_value = None, requires = "client_cert" )]
     client_key: Option<String>,
 
     /// Log level
     #[arg(short, long, env = "BRISK_LOG_LEVEL", default_value = "info")]
-    log_level: String
+    log_level: String,
+
+    /// Username
+    #[arg(short = 'P', long, env = "BRISK_USERNAME", default_value = None, requires = "password")]
+    username: Option<String>,
+
+    /// Password
+    #[arg(short = 'U', long, env = "BRISK_PASSWORD", default_value = None, hide_env_values= true, requires = "username")]
+    password: Option<String>,
 }
 
 fn main() {
@@ -70,6 +78,8 @@ fn main() {
         .root_ca(&args.root_ca)
         .client_cert(&args.client_cert)
         .client_key(&args.client_key)
+        .username(&args.username)
+        .password(&args.password)
         .run()
         .unwrap();
 
