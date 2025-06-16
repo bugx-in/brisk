@@ -5,7 +5,7 @@ use whoami;
 use std::thread;
 use notify_rust::Notification;
 use rumqttc::v5::mqttbytes::{v5::Publish, v5::Packet, QoS};
-use rumqttc::v5::{AsyncClient, ClientError, ConnectionError, MqttOptions};
+use rumqttc::v5::{AsyncClient, ClientError, MqttOptions};
 use rumqttc::{TlsConfiguration, Transport};
 use serde_json::error;
 use std::time::Duration;
@@ -234,15 +234,9 @@ impl Brisk {
                             Brisk::notify(&mqtt_message);
                         }
                     }
-                    Err(ConnectionError::Io(e)) => {
-                        error!("Error receiving message from MQTT broker: {e:?}");
-                        if let std::io::ErrorKind::ConnectionRefused = e.kind() {
-                            warn!("Connection lost. Attempting to reconnect...");
-                        } else {
-                            warn!("Could not connect to the message broker, will try again in 1 minute.");
-                            time::sleep(Duration::from_secs(60)).await;
-                            
-                        }
+                    Err(e) => {
+                        error!("Error receiving message from MQTT broker, will try again in 1 minute: {e:?}");
+                        time::sleep(Duration::from_secs(60)).await;
                     }
                     _ => {}
                 }
