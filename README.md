@@ -8,11 +8,11 @@ Generate remote custom desktop notifications for users using MQTT.
 
 The brisk client subscribes to a topic in the MQTT broker and waits for messages. When a message is received in that topic it is parsed and converted to a desktop notification.
 
-The notification is created using notify-send and a D-BUS monitor is used to retrieve the user's action.
+The notification is created using notify-send and a D-BUS monitor is used to retrieve the user's action. Thanks to the notify-rust crate (https://github.com/hoodie/notify-rust)
 
 ## Requirements
 
-- MQTT broker.
+- MQTT broker that supports MQTT 5
 
 ## Usage
 
@@ -22,7 +22,7 @@ Brisk command line interface
 Usage: brisk [OPTIONS] --broker <BROKER>
 
 Options:
-  -b, --broker <BROKER>            Hostname of the broker [env: BRISK_BROKER=awv3480294.nxdi.nl-cdc01.nxp.com]
+  -b, --broker <BROKER>            Hostname of the broker [env: BRISK_BROKER=]
   -p, --port <PORT>                Port of the broker [env: BRISK_BROKER_PORT=] [default: 1883]
   -t, --topics <TOPICS>            Topics of the broker [env: BRISK_TOPICS=] [default: brisk]
   -k, --keep-alive <KEEP_ALIVE>    Maximum time in seconds allowed to elapse between MQTT packets sent by the client [env: BRISK_KEEP_ALIVE=] [default: 20]
@@ -38,7 +38,7 @@ Options:
 
 ## Notifications
 
-**MQTT message**
+**MQTT message example**
 
 ```
 $ mosquitto_pub -h <BROKER_HOSTNAME> -p 1883 -t "brisk" -m '{"id": 23, "summary": "Alert issues", "body": "There is an issue in the infrastructure, refer to this FAQ", "icon": "firefox", "actions": [{"name": "action1", "display": "Go to FAQ"}, {"name": "action2", "display": "Dismiss"}]}'
