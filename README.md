@@ -22,12 +22,18 @@ Brisk command line interface
 Usage: brisk [OPTIONS] --broker <BROKER>
 
 Options:
-  -b, --broker <BROKER>          Hostname of the broker [env: BRISK_BROKER=]
-  -p, --port <PORT>              Port of the broker [env: BRISK_BROKER_PORT=] [default: 1883]
-  -t, --topics <TOPICS>          Topic of the broker [env: BRISK_TOPICS=]
-  -k, --keep-alive <KEEP_ALIVE>  Topic of the broker [env: BRISK_KEEP_ALIVE=] [default: 5]
-  -h, --help                     Print help
-  -V, --version                  Print version
+  -b, --broker <BROKER>            Hostname of the broker [env: BRISK_BROKER=awv3480294.nxdi.nl-cdc01.nxp.com]
+  -p, --port <PORT>                Port of the broker [env: BRISK_BROKER_PORT=] [default: 1883]
+  -t, --topics <TOPICS>            Topics of the broker [env: BRISK_TOPICS=] [default: brisk]
+  -k, --keep-alive <KEEP_ALIVE>    Maximum time in seconds allowed to elapse between MQTT packets sent by the client [env: BRISK_KEEP_ALIVE=] [default: 20]
+      --root-ca <ROOT_CA>          Root CA certificate for TLS connection [env: BRISK_ROOT_CA=]
+      --client-cert <CLIENT_CERT>  Client certificate for mTLS connection [env: BRISK_CLIENT_CERT=]
+      --client-key <CLIENT_KEY>    Client key for mTLS connection [env: BRISK_CLIENT_KEY=]
+  -l, --log-level <LOG_LEVEL>      Log level [env: BRISK_LOG_LEVEL=] [default: info]
+  -P, --username <USERNAME>        Username [env: BRISK_USERNAME=]
+  -U, --password <PASSWORD>        Password [env: BRISK_PASSWORD]
+  -h, --help                       Print help
+  -V, --version                    Print version
 ```
 
 ## Notifications
@@ -38,12 +44,23 @@ Options:
 $ mosquitto_pub -h <BROKER_HOSTNAME> -p 1883 -t "brisk" -m '{"id": 23, "summary": "Alert issues", "body": "There is an issue in the infrastructure, refer to this FAQ", "icon": "firefox", "actions": [{"name": "action1", "display": "Go to FAQ"}, {"name": "action2", "display": "Dismiss"}]}'
 ```
 
-**Desktop notification**
+**Desktop notification Linux**
 
 ![image](https://github.com/user-attachments/assets/42521023-fc18-49f7-acf4-6c9bc70bcff9)
+
+**Desktop notification Windows**
+
+*For windows actions are not supported*
+
+![image](https://github.com/user-attachments/assets/6cdda858-2802-4d41-861e-d9ccc4007294)
 
 ## Roadmap
 
 - [x] Support MQTT 5.1
-- [ ] Support TLS
-- [ ] Support client user:password
+- [x] Support TLS
+- [x] Support Windows
+- [x] Support client user:password
+- [ ] Support actions in Windows
+- [ ] Support custom actions
+- [ ] Logging to a file
+

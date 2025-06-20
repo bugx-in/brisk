@@ -41,14 +41,8 @@ jobs:
       - name: Build x86_64-unknown-linux-gnu
         run: cross build --target x86_64-unknown-linux-gnu --release
 
-      - name: Build aarch64-unknown-linux-gnu
-        run: cross build --target aarch64-unknown-linux-gnu --release
-
-      - name: Build aarch64-unknown-linux-musl
-        run: cross build --target aarch64-unknown-linux-musl --release
-
-      - name: Build armv7-unknown-linux-gnueabihf
-        run: cross build --target armv7-unknown-linux-gnueabihf --release
+      - name: Build x86_64-pc-windows-gnu
+        run: cross build --target x86_64-pc-windows-gnu --release
 
       - name: Rename binaries
         run: |
@@ -56,6 +50,8 @@ jobs:
           for arch in $(ls target); do
             if [[ -e "target/${arch}/release/brisk" ]]; then
               cp target/${arch}/release/brisk brisk-bins/brisk-${arch}
+            elif [[ -e "target/${arch}/release/brisk.exe" ]]; then
+              cp target/${arch}/release/brisk.exe brisk-bins/brisk-${arch}.exe
             fi
           done
 
