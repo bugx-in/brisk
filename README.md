@@ -60,3 +60,7 @@ $ mosquitto_pub -h <BROKER_HOSTNAME> -p 1883 -t "brisk" -m '{"id": 23, "summary"
 - [x] Support TLS
 - [x] Support Windows
 - [x] Support client user:password
+- [ ] Support actions in Windows
+- [ ] Support custom actions
+- [ ] Logging to a file
+
